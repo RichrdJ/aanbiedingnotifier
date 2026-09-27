@@ -1,0 +1,37 @@
+# Producten waar je op wilt letten. Er wordt gezocht in productnaam + merk
+# (hoofdletterongevoelig). Een treffer moet ALLE woorden van de zoekterm bevatten.
+keywords:
+  - monster
+  - fitmeals
+  - kwark
+  - red bull
+
+# Producten met deze woorden worden overgeslagen (optioneel)
+exclude: []
+
+# Welke winkels scannen
+sources:
+  ah: true
+  jumbo: true
+  lidl: true
+  aldi: true
+  dirk: true
+  dekamarkt: true
+  plus: true        # Coop NL is opgegaan in Plus; 'coop: true' werkt ook
+
+# Alleen melden wat je nog niet eerder gezien hebt (per actieperiode)
+only_new: false
+
+notify:
+  # Gratis pushmeldingen via de ntfy-app (iOS/Android). Kies een lastig te raden topic.
+  ntfy:
+    enabled: true
+    server: https://ntfy.sh
+    topic: mijn-aanbiedingen-xyz123
+  telegram:
+    enabled: false
+    bot_token: ""
+    chat_id: ""
+  discord:
+    enabled: false
+    webhook_url: ""
