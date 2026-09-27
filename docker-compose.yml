@@ -1,16 +1,17 @@
 services:
   aanbiedingnotifier:
     build: .
-    # Of gebruik de kant-en-klare image uit GitHub Container Registry:
-    # image: ghcr.io/<jouw-github-naam>/aanbiedingnotifier:latest
+    # Of de kant-en-klare image (na `docker login ghcr.io`):
+    # image: ghcr.io/richrdj/aanbiedingnotifier:latest
     container_name: aanbiedingnotifier
     restart: unless-stopped
     shm_size: 1gb            # Chromium heeft wat gedeeld geheugen nodig
+    ports:
+      - "4040:4040"          # GUI: http://<server-ip>:4040
     environment:
       - TZ=Europe/Amsterdam
-      # Elke maandag om 08:00 (AH/Dirk/Deka/Jumbo/Plus starten hun actieweek rond maandag/woensdag)
-      - SCHEDULE=0 8 * * 1
-      - RUN_ON_START=true
+      - RUN_ON_START=false   # scannen kan ook met de knop in de GUI
+      # - GUI_PASSWORD=kies-een-wachtwoord   # aanraden als de GUI buiten je thuisnetwerk bereikbaar is
     volumes:
-      - ./config.yaml:/config/config.yaml:ro
+      - ./config:/config     # config.yaml wordt automatisch aangemaakt en is te bewerken via de GUI
       - ./data:/data

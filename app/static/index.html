@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>aanbiedingnotifier</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏷️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF1F4; --surface:#FFFFFF; --ink:#14213D; --muted:#5E6B7D; --line:#CBD3DC;
+  --tag:#FFD23F; --tag-ink:#14213D; --deal:#C8203A; --ok:#1F7A4D; --focus:#2F6FEB;
+  --font:"Archivo", "Helvetica Neue", Arial, system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#101826; --surface:#18223A; --ink:#E8EDF4; --muted:#9AA7BA; --line:#2B3854;
+         --tag:#FFD23F; --tag-ink:#14213D; --deal:#FF6B7E; --ok:#5CCB91; --focus:#7FA7FF; }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.45}
+body{padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+
+/* header */
+header{padding:28px 0 0}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{font-weight:850;font-stretch:72%;font-size:clamp(30px,5vw,44px);letter-spacing:-.01em;line-height:1;margin:0}
+.status{color:var(--muted);font-size:14px;margin:8px 0 0}
+.status b{color:var(--ink);font-weight:600}
+.btn{border:1.5px solid var(--ink);background:var(--ink);color:var(--bg);border-radius:6px;padding:10px 18px;font-weight:650;cursor:pointer}
+.btn:disabled{opacity:.55;cursor:progress}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.small{padding:6px 12px;font-size:14px}
+nav{display:flex;gap:4px;margin-top:24px;border-bottom:1.5px solid var(--line);overflow-x:auto}
+nav button{background:none;border:0;padding:10px 14px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1.5px;white-space:nowrap}
+nav button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--ink)}
+
+main{padding:24px 0 64px}
+.view[hidden]{display:none}
+
+/* watchlist */
+.watch{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:20px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1.5px solid var(--line);border-radius:999px;padding:5px 6px 5px 12px;font-weight:600;font-size:15px}
+.chip button{border:0;background:none;cursor:pointer;color:var(--muted);width:22px;height:22px;border-radius:50%;line-height:1;font-size:16px}
+.chip button:hover{background:var(--bg);color:var(--ink)}
+.addkw{display:flex;gap:6px}
+.addkw input{border:1.5px dashed var(--line);background:transparent;border-radius:999px;padding:6px 14px;width:190px}
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:8px}
+.storefilter{display:flex;flex-wrap:wrap;gap:6px}
+.storefilter button{border:1.5px solid var(--line);background:transparent;border-radius:6px;padding:4px 10px;font-size:14px;cursor:pointer;color:var(--muted)}
+.storefilter button[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.search{border:1.5px solid var(--line);background:var(--surface);border-radius:6px;padding:7px 12px;min-width:200px}
+
+/* offer groups */
+.group{margin-top:32px}
+.group h2{font-weight:850;font-stretch:72%;font-size:28px;margin:0 0 2px;line-height:1.1}
+.group .sub{color:var(--muted);font-size:14px;margin:0 0 12px}
+.list{background:var(--surface);border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+.offer{display:grid;grid-template-columns:120px 1fr auto;gap:16px;align-items:center;padding:14px 16px;border-top:1px solid var(--line);color:inherit;text-decoration:none}
+.offer:first-child{border-top:0}
+a.offer:hover{background:color-mix(in srgb,var(--bg) 60%,transparent)}
+.store{font-weight:700;font-size:14px}
+.title{font-weight:600;margin:0}
+.meta{color:var(--muted);font-size:14px;margin:2px 0 0}
+.new{display:inline-block;font-size:12px;font-weight:700;color:var(--ok);margin-left:8px}
+.none{color:var(--muted);padding:14px 16px;font-size:15px}
+
+/* the price tag */
+.tag{min-width:118px;text-align:right}
+.tag .deal{display:block;color:var(--deal);font-weight:700;font-size:13px;margin-bottom:4px;max-width:180px;margin-left:auto}
+.tag .price{display:inline-flex;align-items:flex-start;background:var(--tag);color:var(--tag-ink);padding:2px 10px 4px 10px;border-radius:3px;font-weight:900;font-stretch:62%;line-height:1}
+.tag .eur{font-size:34px;letter-spacing:-.02em}
+.tag .ct{font-size:17px;margin-top:3px;margin-left:1px}
+.tag .was{display:block;color:var(--muted);font-size:13px;text-decoration:line-through;margin-top:3px}
+
+.empty{background:var(--surface);border:1.5px dashed var(--line);border-radius:10px;padding:36px 24px;text-align:center}
+.empty p{margin:0 0 16px;color:var(--muted)}
+
+/* settings */
+.section{background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:20px;margin-bottom:20px}
+.section h3{margin:0 0 4px;font-size:19px}
+.section .hint{color:var(--muted);font-size:14px;margin:0 0 16px}
+.stores{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1.5px solid var(--line);border-radius:8px;padding:10px 12px}
+.toggle small{display:block;color:var(--muted);font-size:13px}
+.toggle small.err{color:var(--deal)}
+.switch{appearance:none;width:40px;height:24px;border-radius:999px;background:var(--line);position:relative;cursor:pointer;flex:none;transition:background .15s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .15s}
+.switch:checked{background:var(--ink)}
+.switch:checked::after{transform:translateX(16px)}
+.field{display:grid;gap:4px;margin-bottom:14px}
+.field label{font-weight:600;font-size:14px}
+.field input,.field select{border:1.5px solid var(--line);background:var(--bg);border-radius:6px;padding:8px 10px;width:100%;max-width:460px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.channel{border-top:1px solid var(--line);padding-top:16px;margin-top:16px}
+.channel:first-of-type{border-top:0;margin-top:0;padding-top:0}
+.channel .row{justify-content:space-between;max-width:460px;margin-bottom:10px}
+.savebar{position:sticky;bottom:0;padding:12px 0 calc(12px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 35%);display:flex;gap:12px;align-items:center}
+.msg{font-size:14px;color:var(--muted)}
+.msg.err{color:var(--deal)}
+
+/* log */
+pre.log{background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:16px;font-size:13px;line-height:1.55;overflow:auto;max-height:70vh;white-space:pre-wrap;margin:0;font-family:ui-monospace,Menlo,Consolas,monospace}
+
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .8s linear infinite;vertical-align:-1px;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spinner{animation-duration:2.5s}.switch,.switch::after{transition:none}}
+
+@media (max-width:640px){
+  .offer{grid-template-columns:1fr auto;gap:4px 12px}
+  .store{grid-column:1/-1}
+  .tag{grid-row:2/4;grid-column:2}
+  .search{min-width:0;width:100%}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="top">
+      <div>
+        <h1 class="brand">aanbiedingnotifier</h1>
+        <p class="status" id="status">Status laden…</p>
+      </div>
+      <button class="btn" id="scanBtn">Nu scannen</button>
+    </div>
+    <nav role="tablist">
+      <button role="tab" aria-selected="true" data-view="offers">Aanbiedingen</button>
+      <button role="tab" aria-selected="false" data-view="settings">Instellingen</button>
+      <button role="tab" aria-selected="false" data-view="log">Logboek</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="view" id="view-offers">
+      <div class="watch" id="watch" aria-label="Producten die je volgt"></div>
+      <div class="filters">
+        <div class="storefilter" id="storefilter"></div>
+        <input class="search" id="search" type="search" placeholder="Zoek in resultaten">
+      </div>
+      <div id="groups"></div>
+    </section>
+
+    <section class="view" id="view-settings" hidden>
+      <div class="section">
+        <h3>Winkels</h3>
+        <p class="hint">Welke supermarkten er gescand worden, met het resultaat van de laatste scan.</p>
+        <div class="stores" id="stores"></div>
+      </div>
+
+      <div class="section">
+        <h3>Wanneer scannen</h3>
+        <p class="hint">De meeste supermarkten starten hun actieweek op maandag, Lidl ook op woensdag en vrijdag.</p>
+        <div class="field">
+          <label for="schedPreset">Schema</label>
+          <select id="schedPreset">
+            <option value="0 8 * * 1">Elke maandag om 08:00</option>
+            <option value="0 8 * * 1,3">Maandag en woensdag om 08:00</option>
+            <option value="0 8 * * 1,3,5">Maandag, woensdag en vrijdag om 08:00</option>
+            <option value="0 8 * * *">Elke dag om 08:00</option>
+            <option value="custom">Eigen cron-regel</option>
+          </select>
+        </div>
+        <div class="field" id="cronField" hidden>
+          <label for="cron">Cron-regel (minuut uur dag maand weekdag)</label>
+          <input id="cron" placeholder="0 8 * * 1">
+        </div>
+        <label class="toggle" style="max-width:460px">
+          <span>Alleen nieuwe aanbiedingen melden<small>Zelfde actie van vorige keer wordt niet opnieuw gestuurd</small></span>
+          <input type="checkbox" class="switch" id="onlyNew">
+        </label>
+      </div>
+
+      <div class="section">
+        <h3>Uitsluiten</h3>
+        <p class="hint">Producten met een van deze woorden worden overgeslagen. Scheid met komma's.</p>
+        <div class="field"><input id="exclude" placeholder="bijv. zero, suikervrij"></div>
+      </div>
+
+      <div class="section">
+        <h3>Meldingen</h3>
+        <p class="hint">Waar je het weekoverzicht wilt ontvangen.</p>
+        <div class="channel">
+          <div class="row"><strong>ntfy (pushmelding op je telefoon)</strong><input type="checkbox" class="switch" id="ntfyOn" aria-label="ntfy aan"></div>
+          <div class="field"><label for="ntfyServer">Server</label><input id="ntfyServer" placeholder="https://ntfy.sh"></div>
+          <div class="field"><label for="ntfyTopic">Topic</label><input id="ntfyTopic" placeholder="mijn-aanbiedingen-xyz123"></div>
+        </div>
+        <div class="channel">
+          <div class="row"><strong>Telegram</strong><input type="checkbox" class="switch" id="tgOn" aria-label="Telegram aan"></div>
+          <div class="field"><label for="tgToken">Bot-token</label><input id="tgToken" type="password" autocomplete="off"></div>
+          <div class="field"><label for="tgChat">Chat-ID</label><input id="tgChat"></div>
+        </div>
+        <div class="channel">
+          <div class="row"><strong>Discord</strong><input type="checkbox" class="switch" id="dcOn" aria-label="Discord aan"></div>
+          <div class="field"><label for="dcHook">Webhook-URL</label><input id="dcHook" type="password" autocomplete="off"></div>
+        </div>
+        <button class="btn ghost small" id="testBtn">Testmelding sturen</button>
+      </div>
+
+      <div class="savebar">
+        <button class="btn" id="saveBtn">Instellingen opslaan</button>
+        <span class="msg" id="saveMsg"></span>
+      </div>
+    </section>
+
+    <section class="view" id="view-log" hidden>
+      <pre class="log" id="log">Logboek laden…</pre>
+    </section>
+  </main>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const api = async (path, opts = {}) => {
+  const r = await fetch(path, {headers: {"Content-Type": "application/json"}, ...opts});
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok && r.status !== 409) throw new Error(data.error || `Fout ${r.status}`);
+  return data;
+};
+
+let cfg = {}, status = {}, offers = [], activeStore = null, wasRunning = false;
+
+/* ---------- tabs ---------- */
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button").forEach(x => x.setAttribute("aria-selected", x === b));
+  document.querySelectorAll(".view").forEach(v => v.hidden = v.id !== "view-" + b.dataset.view);
+  if (b.dataset.view === "log") loadLog();
+});
+
+/* ---------- status ---------- */
+const fmtDate = iso => iso ? new Date(iso).toLocaleString("nl-NL", {weekday:"short", day:"numeric", month:"short", hour:"2-digit", minute:"2-digit"}) : null;
+
+function renderStatus() {
+  const btn = $("#scanBtn");
+  if (status.running) {
+    $("#status").innerHTML = `<span class="spinner"></span>Bezig met scannen van alle winkels. Dit duurt een paar minuten.`;
+    btn.disabled = true; btn.textContent = "Scannen…";
+    return;
+  }
+  btn.disabled = false; btn.textContent = "Nu scannen";
+  const parts = [];
+  if (status.last_scan) parts.push(`Laatst gescand <b>${esc(fmtDate(status.last_scan))}</b>, ${status.last_count ?? 0} treffers.`);
+  else parts.push("Nog niet gescand.");
+  if (status.next_scan) parts.push(`Volgende scan <b>${esc(fmtDate(status.next_scan))}</b>.`);
+  if (status.last_error) parts.push(`<span style="color:var(--deal)">Laatste scan mislukt: ${esc(status.last_error)}</span>`);
+  $("#status").innerHTML = parts.join(" ");
+}
+
+async function pollStatus() {
+  try {
+    status = await api("/api/status");
+    renderStatus();
+    if (wasRunning && !status.running) { await loadOffers(); renderStores(); }
+    wasRunning = status.running;
+  } catch (e) { $("#status").textContent = "Geen verbinding met de container."; }
+  setTimeout(pollStatus, status.running ? 2500 : 15000);
+}
+
+$("#scanBtn").onclick = async () => {
+  await api("/api/scan", {method: "POST", body: JSON.stringify({notify: true})});
+  status.running = true; wasRunning = true; renderStatus();
+  setTimeout(pollStatus, 1500);
+};
+
+/* ---------- offers ---------- */
+function priceTag(o) {
+  const deal = o.deal ? `<span class="deal">${esc(o.deal)}</span>` : "";
+  let price = "";
+  if (typeof o.price === "number") {
+    const [e, c] = o.price.toFixed(2).split(".");
+    price = `<span class="price" aria-label="€${e},${c}"><span class="eur">${e}</span><span class="ct">${c}</span></span>`;
+  }
+  const was = (typeof o.old_price === "number" && o.old_price > (o.price ?? 0))
+    ? `<span class="was">€${o.old_price.toFixed(2).replace(".", ",")}</span>` : "";
+  return `<div class="tag">${deal}${price}${was}</div>`;
+}
+
+function offerRow(o) {
+  const until = o.valid_until ? (/^\d{4}-\d{2}-\d{2}/.test(o.valid_until)
+      ? "t/m " + new Date(o.valid_until).toLocaleDateString("nl-NL", {weekday:"short", day:"numeric", month:"short"})
+      : o.valid_until) : "";
+  const meta = [o.size, until].filter(Boolean).join(", ");
+  const tagName = o.url ? "a" : "div";
+  const href = o.url ? ` href="${esc(o.url)}" target="_blank" rel="noopener"` : "";
+  return `<${tagName} class="offer"${href}>
+    <span class="store">${esc(o.store)}</span>
+    <div><p class="title">${esc(o.title)}${o.new ? '<span class="new">Nieuw</span>' : ""}</p>${meta ? `<p class="meta">${esc(meta)}</p>` : ""}</div>
+    ${priceTag(o)}
+  </${tagName}>`;
+}
+
+function renderOffers() {
+  const kws = cfg.keywords || [];
+  const q = $("#search").value.trim().toLowerCase();
+  const stores = [...new Set(offers.map(o => o.store))].sort();
+  $("#storefilter").innerHTML = stores.length > 1
+    ? [`<button aria-pressed="${!activeStore}" data-s="">Alle winkels</button>`,
+       ...stores.map(s => `<button aria-pressed="${activeStore === s}" data-s="${esc(s)}">${esc(s)}</button>`)].join("")
+    : "";
+  $("#storefilter").querySelectorAll("button").forEach(b => b.onclick = () => { activeStore = b.dataset.s || null; renderOffers(); });
+
+  if (!status.last_scan && !offers.length) {
+    $("#groups").innerHTML = `<div class="empty"><p>Er is nog geen scan gedaan. Scan nu om te zien wat er deze week in de aanbieding is.</p><button class="btn" onclick="document.getElementById('scanBtn').click()">Nu scannen</button></div>`;
+    return;
+  }
+  if (!kws.length) {
+    $("#groups").innerHTML = `<div class="empty"><p>Je volgt nog geen producten. Voeg er hierboven een toe, bijvoorbeeld Monster of Fitmeals.</p></div>`;
+    return;
+  }
+  const visible = offers.filter(o => (!activeStore || o.store === activeStore)
+    && (!q || `${o.title} ${o.brand} ${o.store}`.toLowerCase().includes(q)));
+  $("#groups").innerHTML = kws.map(kw => {
+    const list = visible.filter(o => (o.matched || []).includes(kw))
+      .sort((a, b) => a.store.localeCompare(b.store) || (a.price ?? 99) - (b.price ?? 99));
+    const n = new Set(list.map(o => o.store)).size;
+    const sub = list.length ? `${list.length} ${list.length === 1 ? "aanbieding" : "aanbiedingen"} bij ${n} ${n === 1 ? "winkel" : "winkels"}` : "";
+    return `<div class="group"><h2>${esc(kw)}</h2>${sub ? `<p class="sub">${sub}</p>` : ""}
+      <div class="list">${list.length ? list.map(offerRow).join("") : `<div class="none">Deze week nergens in de aanbieding${activeStore || q ? " binnen je filter" : ""}.</div>`}</div></div>`;
+  }).join("");
+}
+
+async function loadOffers() { offers = await api("/api/offers"); renderOffers(); }
+$("#search").oninput = renderOffers;
+
+/* ---------- watchlist ---------- */
+function renderWatch() {
+  $("#watch").innerHTML = (cfg.keywords || []).map((k, i) =>
+    `<span class="chip">${esc(k)}<button aria-label="${esc(k)} niet meer volgen" data-i="${i}">×</button></span>`).join("")
+    + `<form class="addkw" id="addForm"><input id="newKw" placeholder="Product toevoegen" aria-label="Product toevoegen"></form>`;
+  $("#watch").querySelectorAll(".chip button").forEach(b => b.onclick = async () => {
+    cfg.keywords.splice(+b.dataset.i, 1); await saveConfig(true); renderWatch(); renderOffers();
+  });
+  $("#addForm").onsubmit = async e => {
+    e.preventDefault();
+    const v = $("#newKw").value.trim();
+    if (!v) return;
+    cfg.keywords = [...(cfg.keywords || []), v];
+    await saveConfig(true); renderWatch(); renderOffers();
+    $("#newKw").focus();
+  };
+}
+
+/* ---------- settings ---------- */
+function renderStores() {
+  const names = status.stores || {};
+  const src = cfg.sources || {};
+  $("#stores").innerHTML = Object.entries(names).map(([k, n]) => {
+    const r = (status.per_store || {})[k];
+    const on = !!(src[k] ?? (k === "plus" && src.coop));
+    let info = "Nog niet gescand";
+    let cls = "";
+    if (r && r.ok) info = r.offers == null ? "Werkt" : `${r.offers} acties bij laatste scan`;
+    if (r && !r.ok) { info = "Mislukt bij laatste scan"; cls = "err"; }
+    return `<label class="toggle"><span>${esc(n)}<small class="${cls}" title="${esc(r?.error || "")}">${esc(info)}</small></span>
+      <input type="checkbox" class="switch" data-store="${k}" ${on ? "checked" : ""}></label>`;
+  }).join("");
+}
+
+function fillSettings() {
+  const presets = [...$("#schedPreset").options].map(o => o.value);
+  const s = cfg.schedule || "0 8 * * 1";
+  $("#schedPreset").value = presets.includes(s) ? s : "custom";
+  $("#cron").value = s;
+  $("#cronField").hidden = $("#schedPreset").value !== "custom";
+  $("#onlyNew").checked = !!cfg.only_new;
+  $("#exclude").value = (cfg.exclude || []).join(", ");
+  const n = cfg.notify || {};
+  $("#ntfyOn").checked = !!n.ntfy?.enabled; $("#ntfyServer").value = n.ntfy?.server || "https://ntfy.sh"; $("#ntfyTopic").value = n.ntfy?.topic || "";
+  $("#tgOn").checked = !!n.telegram?.enabled; $("#tgToken").value = n.telegram?.bot_token || ""; $("#tgChat").value = n.telegram?.chat_id || "";
+  $("#dcOn").checked = !!n.discord?.enabled; $("#dcHook").value = n.discord?.webhook_url || "";
+  renderStores();
+}
+$("#schedPreset").onchange = () => {
+  $("#cronField").hidden = $("#schedPreset").value !== "custom";
+  if ($("#schedPreset").value !== "custom") $("#cron").value = $("#schedPreset").value;
+};
+
+function collectSettings() {
+  const sources = {};
+  document.querySelectorAll("[data-store]").forEach(c => sources[c.dataset.store] = c.checked);
+  return {
+    ...cfg,
+    schedule: $("#schedPreset").value === "custom" ? $("#cron").value.trim() : $("#schedPreset").value,
+    only_new: $("#onlyNew").checked,
+    exclude: $("#exclude").value.split(",").map(s => s.trim()).filter(Boolean),
+    sources,
+    notify: {
+      ntfy: {enabled: $("#ntfyOn").checked, server: $("#ntfyServer").value.trim() || "https://ntfy.sh", topic: $("#ntfyTopic").value.trim()},
+      telegram: {enabled: $("#tgOn").checked, bot_token: $("#tgToken").value.trim(), chat_id: $("#tgChat").value.trim()},
+      discord: {enabled: $("#dcOn").checked, webhook_url: $("#dcHook").value.trim()},
+    },
+  };
+}
+
+async function saveConfig(quiet) {
+  try {
+    await api("/api/config", {method: "POST", body: JSON.stringify(cfg)});
+    if (!quiet) { $("#saveMsg").className = "msg"; $("#saveMsg").textContent = "Instellingen opgeslagen."; }
+    status = await api("/api/status"); renderStatus();
+    return true;
+  } catch (e) {
+    $("#saveMsg").className = "msg err"; $("#saveMsg").textContent = e.message;
+    return false;
+  }
+}
+$("#saveBtn").onclick = async () => { cfg = collectSettings(); await saveConfig(false); };
+$("#testBtn").onclick = async () => {
+  cfg = collectSettings();
+  if (!(await saveConfig(true))) return;
+  await api("/api/test-notify", {method: "POST"});
+  $("#saveMsg").className = "msg"; $("#saveMsg").textContent = "Instellingen opgeslagen en testmelding verstuurd. Staat hij niet op je telefoon, kijk dan in het logboek.";
+};
+
+/* ---------- log ---------- */
+async function loadLog() {
+  const lines = await api("/api/log");
+  const el = $("#log");
+  el.textContent = lines.length ? lines.join("\n") : "Nog geen meldingen in het logboek.";
+  el.scrollTop = el.scrollHeight;
+}
+setInterval(() => { if (!$("#view-log").hidden) loadLog(); }, 4000);
+
+/* ---------- start ---------- */
+(async () => {
+  [cfg, status] = await Promise.all([api("/api/config"), api("/api/status")]);
+  wasRunning = status.running;
+  renderStatus(); renderWatch(); fillSettings(); await loadOffers();
+  setTimeout(pollStatus, status.running ? 2500 : 15000);
+})();
+</script>
+</body>
+</html>

@@ -7,12 +7,21 @@ en stuurt je een pushmelding.
 ## Starten
 
 ```bash
-cp config.example.yaml config.yaml   # zet je producten + meldingen erin
 docker compose up -d --build
-docker compose logs -f               # meekijken
 ```
 
-Bij opstarten draait meteen een scan, daarna elke maandag om 08:00.
+Open daarna **http://<server-ip>:4040**. Daar voeg je producten toe, kies je winkels,
+het scanschema en je meldingen, en start je een scan met één klik. De instellingen
+komen in `./config/config.yaml` (wordt automatisch aangemaakt) en kun je ook met de hand bewerken.
+
+### GUI
+
+- **Aanbiedingen:** resultaten per product dat je volgt, filter op winkel of zoek. Nieuwe acties sinds de vorige scan zijn gemarkeerd.
+- **Instellingen:** winkels aan/uit met het resultaat van de laatste scan, scanschema, uitsluitwoorden en meldingen (met testknop).
+- **Logboek:** live meekijken tijdens een scan.
+
+Is de GUI buiten je thuisnetwerk bereikbaar, zet dan `GUI_PASSWORD` in `docker-compose.yml`;
+de GUI vraagt dan om een wachtwoord (gebruikersnaam maakt niet uit).
 
 ## Hoe het per winkel werkt
 
@@ -39,8 +48,10 @@ Telegram en Discord kunnen ook.
 
 | Variabele | Standaard | Uitleg |
 |---|---|---|
-| `SCHEDULE` | `0 8 * * 1` | Cron-schema (min uur dag maand weekdag) |
-| `RUN_ON_START` | `true` | Direct scannen bij opstarten |
+| `GUI_PORT` | `4040` | Poort van de GUI |
+| `GUI_PASSWORD` | leeg | Wachtwoord voor de GUI (aanrader buiten je thuisnetwerk) |
+| `SCHEDULE` | `0 8 * * 1` | Standaard cron-schema als er in de config niets staat |
+| `RUN_ON_START` | `false` | Direct scannen bij opstarten |
 | `RUN_ONCE` | `false` | Eén keer scannen en stoppen |
 
 ## Kant-en-klare image

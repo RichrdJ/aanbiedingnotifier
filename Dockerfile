@@ -5,5 +5,6 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY app/ /app/
-VOLUME ["/data"]
+EXPOSE 4040
+VOLUME ["/config", "/data"]
 CMD ["python", "main.py"]
