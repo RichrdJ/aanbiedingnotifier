@@ -48,6 +48,17 @@ main{padding:24px 0 64px}
 .chip{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1.5px solid var(--line);border-radius:999px;padding:5px 6px 5px 12px;font-weight:600;font-size:15px}
 .chip button{border:0;background:none;cursor:pointer;color:var(--muted);width:22px;height:22px;border-radius:50%;line-height:1;font-size:16px}
 .chip button:hover{background:var(--bg);color:var(--ink)}
+.chip .kwlabel{border:0;background:none;padding:0;width:auto;height:auto;border-radius:0;font:inherit;font-weight:600;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.chip .kwlabel:hover{background:none;text-decoration:underline;text-underline-offset:3px}
+.chip .min{font-size:12px;font-weight:700;background:var(--tag);color:var(--tag-ink);border-radius:3px;padding:1px 5px}
+.chip.open{border-color:var(--ink)}
+.kweditor{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:6px;background:var(--surface);border:1.5px solid var(--ink);border-radius:8px;padding:10px 12px;font-size:14px}
+.kweditor strong{margin-right:4px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:4px}
+.seg button{border:1.5px solid var(--line);background:transparent;border-radius:6px;padding:3px 9px;font-size:14px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.filters .right{display:flex;gap:8px;flex-wrap:wrap}
+.minsel{border:1.5px solid var(--line);background:var(--surface);border-radius:6px;padding:7px 10px}
 .addkw{display:flex;gap:6px}
 .addkw input{border:1.5px dashed var(--line);background:transparent;border-radius:999px;padding:6px 14px;width:190px}
 .filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:8px}
@@ -76,6 +87,7 @@ a.offer:hover{background:color-mix(in srgb,var(--bg) 60%,transparent)}
 .tag .price{display:inline-flex;align-items:flex-start;background:var(--tag);color:var(--tag-ink);padding:2px 10px 4px 10px;border-radius:3px;font-weight:900;font-stretch:62%;line-height:1}
 .tag .eur{font-size:34px;letter-spacing:-.02em}
 .tag .ct{font-size:17px;margin-top:3px;margin-left:1px}
+.tag .pct{white-space:nowrap}
 .tag .was{display:block;color:var(--muted);font-size:13px;text-decoration:line-through;margin-top:3px}
 
 .empty{background:var(--surface);border:1.5px dashed var(--line);border-radius:10px;padding:36px 24px;text-align:center}
@@ -115,7 +127,7 @@ pre.log{background:var(--surface);border:1.5px solid var(--line);border-radius:1
   .offer{grid-template-columns:1fr auto;gap:4px 12px}
   .store{grid-column:1/-1}
   .tag{grid-row:2/4;grid-column:2}
-  .search{min-width:0;width:100%}
+  .search{min-width:0;flex:1}.filters .right{width:100%}
 }
 </style>
 </head>
@@ -141,7 +153,17 @@ pre.log{background:var(--surface);border:1.5px solid var(--line);border-radius:1
       <div class="watch" id="watch" aria-label="Producten die je volgt"></div>
       <div class="filters">
         <div class="storefilter" id="storefilter"></div>
-        <input class="search" id="search" type="search" placeholder="Zoek in resultaten">
+        <div class="right">
+          <select class="minsel" id="minFilter" aria-label="Minimale korting">
+            <option value="0">Elke korting</option>
+            <option value="20">Minimaal 20%</option>
+            <option value="25">Minimaal 25%</option>
+            <option value="30">Minimaal 30%</option>
+            <option value="40">Minimaal 40%</option>
+            <option value="50">Minimaal 50%</option>
+          </select>
+          <input class="search" id="search" type="search" placeholder="Zoek in resultaten">
+        </div>
       </div>
       <div id="groups"></div>
     </section>
@@ -177,6 +199,27 @@ pre.log{background:var(--surface);border:1.5px solid var(--line);border-radius:1
       </div>
 
       <div class="section">
+        <h3>Minimale korting</h3>
+        <p class="hint">Standaard voor alle producten. Per product stel je een eigen minimum in door op het product te tikken, of typ bijvoorbeeld "monster 30%" bij het toevoegen.</p>
+        <div class="field">
+          <label for="minDefault">Alleen melden vanaf</label>
+          <select id="minDefault">
+            <option value="0">Elke korting</option>
+            <option value="10">10% korting</option>
+            <option value="20">20% korting</option>
+            <option value="25">25% korting</option>
+            <option value="30">30% korting</option>
+            <option value="40">40% korting</option>
+            <option value="50">50% korting</option>
+          </select>
+        </div>
+        <label class="toggle" style="max-width:460px">
+          <span>Acties zonder bekend percentage toch meenemen<small>Zoals "3 voor 4,00" als de normale prijs onbekend is</small></span>
+          <input type="checkbox" class="switch" id="inclUnknown">
+        </label>
+      </div>
+
+      <div class="section">
         <h3>Uitsluiten</h3>
         <p class="hint">Producten met een van deze woorden worden overgeslagen. Scheid met komma's.</p>
         <div class="field"><input id="exclude" placeholder="bijv. zero, suikervrij"></div>
@@ -198,6 +241,18 @@ pre.log{background:var(--surface);border:1.5px solid var(--line);border-radius:1
         <div class="channel">
           <div class="row"><strong>Discord</strong><input type="checkbox" class="switch" id="dcOn" aria-label="Discord aan"></div>
           <div class="field"><label for="dcHook">Webhook-URL</label><input id="dcHook" type="password" autocomplete="off"></div>
+        </div>
+        <div class="channel">
+          <div class="row"><strong>Pushover</strong><input type="checkbox" class="switch" id="poOn" aria-label="Pushover aan"></div>
+          <div class="field"><label for="poApp">API-token (applicatie)</label><input id="poApp" type="password" autocomplete="off"></div>
+          <div class="field"><label for="poUser">User key</label><input id="poUser" type="password" autocomplete="off"></div>
+          <div class="field"><label for="poDevice">Apparaat (optioneel)</label><input id="poDevice" placeholder="alle apparaten"></div>
+          <div class="field"><label for="poPrio">Prioriteit</label>
+            <select id="poPrio">
+              <option value="-1">Laag (geen geluid)</option>
+              <option value="0">Normaal</option>
+              <option value="1">Hoog</option>
+            </select></div>
         </div>
         <button class="btn ghost small" id="testBtn">Testmelding sturen</button>
       </div>
@@ -224,7 +279,14 @@ const api = async (path, opts = {}) => {
   return data;
 };
 
-let cfg = {}, status = {}, offers = [], activeStore = null, wasRunning = false;
+let cfg = {}, status = {}, offers = [], activeStore = null, wasRunning = false, editing = null;
+const kwTerm = k => typeof k === "string" ? k.replace(/\s+\d{1,2}\s*%$/, "").trim() : (k.term || "");
+const kwOwnMin = k => {
+  if (typeof k === "string") { const m = k.match(/\s+(\d{1,2})\s*%$/); return m ? +m[1] : null; }
+  return k.min_discount ?? null;
+};
+const kwMin = k => kwOwnMin(k) ?? (+cfg.min_discount || 0);
+const makeKw = (term, min) => min == null ? term : {term, min_discount: min};
 
 /* ---------- tabs ---------- */
 document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
@@ -270,7 +332,9 @@ $("#scanBtn").onclick = async () => {
 
 /* ---------- offers ---------- */
 function priceTag(o) {
-  const deal = o.deal ? `<span class="deal">${esc(o.deal)}</span>` : "";
+  const pct = (typeof o.discount === "number" && o.discount > 0 && !String(o.deal || "").includes("%"))
+    ? ` <span class="pct">(−${Math.round(o.discount)}%)</span>` : "";
+  const deal = o.deal ? `<span class="deal">${esc(o.deal)}${pct}</span>` : "";
   let price = "";
   if (typeof o.price === "number") {
     const [e, c] = o.price.toFixed(2).split(".");
@@ -296,8 +360,9 @@ function offerRow(o) {
 }
 
 function renderOffers() {
-  const kws = cfg.keywords || [];
+  const kws = (cfg.keywords || []).map(kwTerm);
   const q = $("#search").value.trim().toLowerCase();
+  const minF = +$("#minFilter").value || 0;
   const stores = [...new Set(offers.map(o => o.store))].sort();
   $("#storefilter").innerHTML = stores.length > 1
     ? [`<button aria-pressed="${!activeStore}" data-s="">Alle winkels</button>`,
@@ -314,33 +379,61 @@ function renderOffers() {
     return;
   }
   const visible = offers.filter(o => (!activeStore || o.store === activeStore)
+    && (!minF || (typeof o.discount === "number" && o.discount >= minF))
     && (!q || `${o.title} ${o.brand} ${o.store}`.toLowerCase().includes(q)));
-  $("#groups").innerHTML = kws.map(kw => {
-    const list = visible.filter(o => (o.matched || []).includes(kw))
+  const inclUnknown = cfg.include_unknown_discount !== false;
+  $("#groups").innerHTML = (cfg.keywords || []).map(k => {
+    const kw = kwTerm(k), min = kwMin(k);
+    const list = visible.filter(o => (o.matched || []).includes(kw)
+        && (!min || (typeof o.discount === "number" ? o.discount >= min : inclUnknown)))
       .sort((a, b) => a.store.localeCompare(b.store) || (a.price ?? 99) - (b.price ?? 99));
     const n = new Set(list.map(o => o.store)).size;
     const sub = list.length ? `${list.length} ${list.length === 1 ? "aanbieding" : "aanbiedingen"} bij ${n} ${n === 1 ? "winkel" : "winkels"}` : "";
-    return `<div class="group"><h2>${esc(kw)}</h2>${sub ? `<p class="sub">${sub}</p>` : ""}
-      <div class="list">${list.length ? list.map(offerRow).join("") : `<div class="none">Deze week nergens in de aanbieding${activeStore || q ? " binnen je filter" : ""}.</div>`}</div></div>`;
+    const minTxt = min ? `, minimaal ${min}% korting` : "";
+    return `<div class="group"><h2>${esc(kw)}</h2>${sub || minTxt ? `<p class="sub">${sub || "Geen treffers"}${minTxt}</p>` : ""}
+      <div class="list">${list.length ? list.map(offerRow).join("") : `<div class="none">Deze week nergens in de aanbieding${activeStore || q || minF ? " binnen je filter" : ""}.</div>`}</div></div>`;
   }).join("");
 }
 
 async function loadOffers() { offers = await api("/api/offers"); renderOffers(); }
 $("#search").oninput = renderOffers;
+$("#minFilter").onchange = renderOffers;
 
 /* ---------- watchlist ---------- */
 function renderWatch() {
-  $("#watch").innerHTML = (cfg.keywords || []).map((k, i) =>
-    `<span class="chip">${esc(k)}<button aria-label="${esc(k)} niet meer volgen" data-i="${i}">×</button></span>`).join("")
-    + `<form class="addkw" id="addForm"><input id="newKw" placeholder="Product toevoegen" aria-label="Product toevoegen"></form>`;
-  $("#watch").querySelectorAll(".chip button").forEach(b => b.onclick = async () => {
-    cfg.keywords.splice(+b.dataset.i, 1); await saveConfig(true); renderWatch(); renderOffers();
+  const kws = cfg.keywords || [];
+  let html = kws.map((k, i) => {
+    const own = kwOwnMin(k);
+    const badge = own ? `<span class="min">≥${own}%</span>` : "";
+    return `<span class="chip${editing === i ? " open" : ""}"><button class="kwlabel" data-edit="${i}" aria-expanded="${editing === i}" aria-label="Minimale korting instellen voor ${esc(kwTerm(k))}">${esc(kwTerm(k))}${badge}</button><button aria-label="${esc(kwTerm(k))} niet meer volgen" data-del="${i}">×</button></span>`;
+  }).join("");
+  html += `<form class="addkw" id="addForm"><input id="newKw" placeholder="Product toevoegen" aria-label="Product toevoegen, eventueel met minimale korting zoals monster 30%"></form>`;
+  if (editing != null && kws[editing] !== undefined) {
+    const k = kws[editing], own = kwOwnMin(k), def = +cfg.min_discount || 0;
+    const opts = [[null, `Standaard (${def ? def + "%" : "elke korting"})`], [0, "Elke korting"], [20, "20%"], [25, "25%"], [30, "30%"], [40, "40%"], [50, "50%"]];
+    html += `<div class="kweditor"><strong>Minimale korting voor ${esc(kwTerm(k))}</strong><span class="seg">${
+      opts.map(([v, l]) => `<button type="button" data-min="${v ?? ""}" aria-pressed="${own === v}">${l}</button>`).join("")}</span></div>`;
+  }
+  $("#watch").innerHTML = html;
+
+  $("#watch").querySelectorAll("[data-del]").forEach(b => b.onclick = async () => {
+    cfg.keywords.splice(+b.dataset.del, 1); editing = null;
+    await saveConfig(true); renderWatch(); renderOffers();
+  });
+  $("#watch").querySelectorAll("[data-edit]").forEach(b => b.onclick = () => {
+    editing = editing === +b.dataset.edit ? null : +b.dataset.edit; renderWatch();
+  });
+  $("#watch").querySelectorAll("[data-min]").forEach(b => b.onclick = async () => {
+    const v = b.dataset.min === "" ? null : +b.dataset.min;
+    cfg.keywords[editing] = makeKw(kwTerm(cfg.keywords[editing]), v);
+    await saveConfig(true); renderWatch(); renderOffers();
   });
   $("#addForm").onsubmit = async e => {
     e.preventDefault();
-    const v = $("#newKw").value.trim();
-    if (!v) return;
-    cfg.keywords = [...(cfg.keywords || []), v];
+    const raw = $("#newKw").value.trim();
+    if (!raw) return;
+    const m = raw.match(/^(.*?)\s+(\d{1,2})\s*%$/);
+    cfg.keywords = [...kws, m ? makeKw(m[1].trim(), +m[2]) : raw];
     await saveConfig(true); renderWatch(); renderOffers();
     $("#newKw").focus();
   };
@@ -370,10 +463,16 @@ function fillSettings() {
   $("#cronField").hidden = $("#schedPreset").value !== "custom";
   $("#onlyNew").checked = !!cfg.only_new;
   $("#exclude").value = (cfg.exclude || []).join(", ");
+  const md = String(+cfg.min_discount || 0);
+  if (![...$("#minDefault").options].some(o => o.value === md)) $("#minDefault").add(new Option(md + "% korting", md));
+  $("#minDefault").value = md;
+  $("#inclUnknown").checked = cfg.include_unknown_discount !== false;
   const n = cfg.notify || {};
   $("#ntfyOn").checked = !!n.ntfy?.enabled; $("#ntfyServer").value = n.ntfy?.server || "https://ntfy.sh"; $("#ntfyTopic").value = n.ntfy?.topic || "";
   $("#tgOn").checked = !!n.telegram?.enabled; $("#tgToken").value = n.telegram?.bot_token || ""; $("#tgChat").value = n.telegram?.chat_id || "";
   $("#dcOn").checked = !!n.discord?.enabled; $("#dcHook").value = n.discord?.webhook_url || "";
+  $("#poOn").checked = !!n.pushover?.enabled; $("#poApp").value = n.pushover?.app_token || ""; $("#poUser").value = n.pushover?.user_key || "";
+  $("#poDevice").value = n.pushover?.device || ""; $("#poPrio").value = String(n.pushover?.priority ?? 0);
   renderStores();
 }
 $("#schedPreset").onchange = () => {
@@ -388,12 +487,16 @@ function collectSettings() {
     ...cfg,
     schedule: $("#schedPreset").value === "custom" ? $("#cron").value.trim() : $("#schedPreset").value,
     only_new: $("#onlyNew").checked,
+    min_discount: +$("#minDefault").value || 0,
+    include_unknown_discount: $("#inclUnknown").checked,
     exclude: $("#exclude").value.split(",").map(s => s.trim()).filter(Boolean),
     sources,
     notify: {
       ntfy: {enabled: $("#ntfyOn").checked, server: $("#ntfyServer").value.trim() || "https://ntfy.sh", topic: $("#ntfyTopic").value.trim()},
       telegram: {enabled: $("#tgOn").checked, bot_token: $("#tgToken").value.trim(), chat_id: $("#tgChat").value.trim()},
       discord: {enabled: $("#dcOn").checked, webhook_url: $("#dcHook").value.trim()},
+      pushover: {enabled: $("#poOn").checked, app_token: $("#poApp").value.trim(), user_key: $("#poUser").value.trim(),
+                 device: $("#poDevice").value.trim(), priority: +$("#poPrio").value},
     },
   };
 }
@@ -409,7 +512,7 @@ async function saveConfig(quiet) {
     return false;
   }
 }
-$("#saveBtn").onclick = async () => { cfg = collectSettings(); await saveConfig(false); };
+$("#saveBtn").onclick = async () => { cfg = collectSettings(); await saveConfig(false); renderWatch(); };
 $("#testBtn").onclick = async () => {
   cfg = collectSettings();
   if (!(await saveConfig(true))) return;

@@ -13,6 +13,7 @@ class Offer:
     deal: str = ""                      # bijv. "2e halve prijs", "1+1 gratis"
     valid_until: str = ""
     url: str = ""
+    discount: float | None = None      # kortingspercentage, indien te bepalen
     matched: list[str] = field(default_factory=list)
 
     @property

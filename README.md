@@ -4,6 +4,10 @@ Scant elke week de acties van **Albert Heijn, Jumbo, Lidl, Aldi, Dirk, DekaMarkt
 (inclusief voormalige Coop-winkels) op producten die jij opgeeft, bijv. Monster of Fitmeals,
 en stuurt je een pushmelding.
 
+## Versies
+
+Elke release krijgt een eigen image-tag, bijv. `ghcr.io/richrdj/aanbiedingnotifier:1.0.0`. `latest` volgt de main-branch.
+
 ## Snelst: kant-en-klare stack
 
 Gebruik `stack.yml` (plakken in Portainer of `docker compose -f stack.yml up -d`). Die gebruikt de image van GHCR, dus bouwen is niet nodig. Open daarna http://<server-ip>:4040.
@@ -21,6 +25,7 @@ komen in `./config/config.yaml` (wordt automatisch aangemaakt) en kun je ook met
 ### GUI
 
 - **Aanbiedingen:** resultaten per product dat je volgt, filter op winkel of zoek. Nieuwe acties sinds de vorige scan zijn gemarkeerd.
+- **Minimale korting:** tik op een product om een minimum in te stellen (bijv. alleen Monster bij ≥30% korting), of typ `monster 30%` bij het toevoegen. Een standaardminimum voor alle producten zet je bij Instellingen. Het percentage wordt berekend uit de prijzen of uit de actietekst (2e halve prijs = 25%, 1+1 gratis = 50%, enz.).
 - **Instellingen:** winkels aan/uit met het resultaat van de laatste scan, scanschema, uitsluitwoorden en meldingen (met testknop).
 - **Logboek:** live meekijken tijdens een scan.
 
@@ -46,7 +51,7 @@ de `plus`-bron ook "Coop". `coop: true` in de config werkt als alias.
 ## Meldingen
 
 Makkelijkst: installeer de gratis **ntfy**-app en abonneer je op het topic uit `config.yaml`.
-Telegram en Discord kunnen ook.
+Telegram, Discord en Pushover kunnen ook.
 
 ## Instellingen (docker-compose.yml)
 

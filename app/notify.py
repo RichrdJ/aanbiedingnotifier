@@ -30,6 +30,28 @@ def send(cfg: dict, title: str, body: str):
                 c["webhook_url"], json={"content": chunk}, timeout=20).raise_for_status())
 
 
+    c = n.get("pushover") or {}
+    if c.get("enabled"):
+        # Pushover: max 1024 tekens per bericht, dus zo nodig opsplitsen op regelgrenzen
+        chunks, cur = [], ""
+        for line in body.replace("**", "").splitlines():
+            if len(cur) + len(line) + 1 > 1000:
+                chunks.append(cur)
+                cur = ""
+            cur += line + "\n"
+        chunks.append(cur)
+        for i, chunk in enumerate(chunks):
+            t = title if len(chunks) == 1 else f"{title} ({i + 1}/{len(chunks)})"
+            data = {"token": c.get("app_token", ""), "user": c.get("user_key", ""),
+                    "title": t, "message": chunk.strip() or "-"}
+            if c.get("device"):
+                data["device"] = c["device"]
+            if c.get("priority") not in (None, ""):
+                data["priority"] = int(c["priority"])
+            _try("pushover", lambda data=data: requests.post(
+                "https://api.pushover.net/1/messages.json", data=data, timeout=20).raise_for_status())
+
+
 def _try(name, fn):
     try:
         fn()

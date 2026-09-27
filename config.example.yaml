@@ -1,10 +1,18 @@
 # Producten waar je op wilt letten. Er wordt gezocht in productnaam + merk
 # (hoofdletterongevoelig). Een treffer moet ALLE woorden van de zoekterm bevatten.
+# Optioneel een minimale korting per product: "monster 30%" of
+#   - term: monster
+#     min_discount: 30
 keywords:
   - monster
   - fitmeals
   - kwark
   - red bull
+
+# Standaard minimale korting (%) voor producten zonder eigen minimum. 0 = alles.
+min_discount: 0
+# Acties waarvan het percentage niet te bepalen is (bijv. "3 voor 4,00" zonder normale prijs) toch melden
+include_unknown_discount: true
 
 # Producten met deze woorden worden overgeslagen (optioneel)
 exclude: []
@@ -38,3 +46,9 @@ notify:
   discord:
     enabled: false
     webhook_url: ""
+  pushover:
+    enabled: false
+    app_token: ""     # API-token van je Pushover-applicatie
+    user_key: ""      # jouw user key
+    device: ""        # optioneel
+    priority: 0       # -2 t/m 1
