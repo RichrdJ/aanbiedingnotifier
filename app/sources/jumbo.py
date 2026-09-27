@@ -7,6 +7,7 @@ URL = "https://www.jumbo.com/aanbiedingen/nu"
 
 class Jumbo:
     name = "Jumbo"
+    weight = 4   # browser-scan duurt langer; telt zwaarder mee in de voortgang
 
     def fetch_all(self) -> list[Offer]:
         offers = []

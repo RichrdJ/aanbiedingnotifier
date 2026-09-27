@@ -155,7 +155,18 @@ def scan(cfg: dict) -> list[Offer]:
             if kw not in hit.matched:
                 hit.matched.append(kw)
 
+    # Voortgang: elke winkel met fetch_all telt als 1 stap, AH als 1 stap per zoekwoord
+    steps = {k: (len(keywords) or 1) if not hasattr(SOURCES[k], "fetch_all")
+             else getattr(SOURCES[k], "weight", 1) for k in enabled}
+    total = sum(steps.values()) or 1
+    done = 0
+
+    def progress(key, sub=0.0):
+        STATE["progress"] = {"pct": round(100 * (done + sub) / total), "store": STORE_NAMES.get(key, key),
+                             "store_index": enabled.index(key) + 1, "stores": len(enabled)}
+
     for key in enabled:
+        progress(key)
         try:
             src = SOURCES[key]()
             if hasattr(src, "fetch_all"):
@@ -167,7 +178,8 @@ def scan(cfg: dict) -> list[Offer]:
                     for kw in keywords:
                         add(o, kw)
             else:
-                for kw in keywords:
+                for i, kw in enumerate(keywords):
+                    progress(key, i)
                     try:
                         for o in src.search(kw[0]):
                             add(o, kw)
@@ -178,6 +190,8 @@ def scan(cfg: dict) -> list[Offer]:
         except Exception as e:
             STATE["per_store"][key] = {"ok": False, "error": str(e)[:200]}
             print(f"[{key}] mislukt: {e}")
+        done += steps[key]
+    STATE["progress"] = {"pct": 100, "store": "", "store_index": len(enabled), "stores": len(enabled)}
     return list(found.values())
 
 
@@ -205,7 +219,7 @@ def run_once(notify_enabled: bool = True):
     if not _scan_lock.acquire(blocking=False):
         print("Er loopt al een scan, overgeslagen")
         return False
-    STATE.update(running=True, last_error=None)
+    STATE.update(running=True, last_error=None, progress={"pct": 0, "store": "", "store_index": 0, "stores": 0})
     try:
         cfg = load_config()
         DATA.mkdir(parents=True, exist_ok=True)
@@ -241,6 +255,7 @@ def run_once(notify_enabled: bool = True):
         return False
     finally:
         STATE["running"] = False
+        STATE.pop("progress", None)
         _save_state()
         _scan_lock.release()
 

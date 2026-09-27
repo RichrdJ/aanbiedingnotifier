@@ -9,6 +9,7 @@ URL = "https://www.aldi.nl/aanbiedingen.html"
 
 class Aldi:
     name = "Aldi"
+    weight = 4   # browser-scan duurt langer; telt zwaarder mee in de voortgang
 
     def fetch_all(self) -> list[Offer]:
         offers = []

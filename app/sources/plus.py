@@ -21,6 +21,7 @@ def _wait_stable(page, locator, rounds=20):
 
 class Plus:
     name = "Plus"
+    weight = 4   # browser-scan duurt langer; telt zwaarder mee in de voortgang
 
     def _read(self, page, seen) -> list[Offer]:
         out = []

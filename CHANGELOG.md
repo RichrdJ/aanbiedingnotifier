@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.1.0 — 2026-09-28
+
+- Voortgangsbalk met percentage en huidige winkel tijdens een scan, ook op de scanknop
+- Een product dat je al volgt nogmaals toevoegen werkt nu alleen het minimum bij in plaats van een dubbele regel te maken
+
 ## v1.0.0 — 2026-09-28
 
 Eerste release.

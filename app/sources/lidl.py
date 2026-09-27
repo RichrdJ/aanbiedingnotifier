@@ -14,6 +14,7 @@ TABS = ["Maandag", "Woensdag", "Vrijdag"]
 
 class Lidl:
     name = "Lidl"
+    weight = 4   # browser-scan duurt langer; telt zwaarder mee in de voortgang
 
     def fetch_all(self) -> list[Offer]:
         offers, seen = [], set()
