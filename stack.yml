@@ -1,0 +1,19 @@
+# Plak dit in Portainer (Stacks > Add stack) of start met: docker compose -f stack.yml up -d
+services:
+  aanbiedingnotifier:
+    image: ghcr.io/richrdj/aanbiedingnotifier:latest
+    container_name: aanbiedingnotifier
+    restart: unless-stopped
+    shm_size: 1gb
+    ports:
+      - "4040:4040"
+    environment:
+      - TZ=Europe/Amsterdam
+      # - GUI_PASSWORD=kies-een-wachtwoord
+    volumes:
+      - config:/config
+      - data:/data
+
+volumes:
+  config:
+  data:

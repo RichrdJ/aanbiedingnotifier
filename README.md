@@ -4,7 +4,11 @@ Scant elke week de acties van **Albert Heijn, Jumbo, Lidl, Aldi, Dirk, DekaMarkt
 (inclusief voormalige Coop-winkels) op producten die jij opgeeft, bijv. Monster of Fitmeals,
 en stuurt je een pushmelding.
 
-## Starten
+## Snelst: kant-en-klare stack
+
+Gebruik `stack.yml` (plakken in Portainer of `docker compose -f stack.yml up -d`). Die gebruikt de image van GHCR, dus bouwen is niet nodig. Open daarna http://<server-ip>:4040.
+
+## Zelf bouwen
 
 ```bash
 docker compose up -d --build
