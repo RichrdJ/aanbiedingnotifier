@@ -106,35 +106,20 @@ def matches(offer: Offer, keyword: str, exclude: list[str]) -> bool:
     return all(word in text for word in keyword.lower().split())
 
 
-def keyword_list(cfg: dict) -> list[tuple[str, float]]:
-    """Zoekwoorden als (term, minimale korting). Ondersteunt 'monster', 'monster 30%'
-    en {term: monster, min_discount: 30}. Zonder eigen minimum geldt min_discount uit de config."""
-    default = float(cfg.get("min_discount") or 0)
+def keyword_list(cfg: dict) -> list[str]:
+    """Zoekwoorden uit de config. Oude notaties ('monster 30%' of {term: ...}) worden
+    netjes omgezet naar alleen het zoekwoord."""
     out = []
     for k in cfg.get("keywords", []) or []:
-        if isinstance(k, dict):
-            term, mn = str(k.get("term", "")).strip(), k.get("min_discount")
-        else:
-            term, mn = str(k).strip(), None
-            m = re.search(r"\s+(\d{1,2})\s*%$", term)
-            if m:
-                term, mn = term[:m.start()].strip(), m.group(1)
-        if term:
-            out.append((term, float(mn) if mn not in (None, "") else default))
+        term = str(k.get("term", "")) if isinstance(k, dict) else str(k)
+        term = re.sub(r"\s+\d{1,2}\s*%$", "", term).strip()
+        if term and term not in out:
+            out.append(term)
     return out
-
-
-def discount_ok(o: Offer, minimum: float, include_unknown: bool) -> bool:
-    if minimum <= 0:
-        return True
-    if o.discount is None:
-        return include_unknown
-    return o.discount >= minimum
 
 
 def scan(cfg: dict) -> list[Offer]:
     keywords = keyword_list(cfg)
-    include_unknown = cfg.get("include_unknown_discount", True) is not False
     exclude = [str(x) for x in cfg.get("exclude", []) or []]
     found: dict[str, Offer] = {}
 
@@ -145,12 +130,10 @@ def scan(cfg: dict) -> list[Offer]:
         if on and key in SOURCES and key not in enabled:
             enabled.append(key)
 
-    def add(o: Offer, kw: tuple[str, float]):
-        term, minimum = kw
+    def add(o: Offer, kw: str):
         if o.discount is None:
             o.discount = discount_pct(o.price, o.old_price, o.deal)
-        if matches(o, term, exclude) and discount_ok(o, minimum, include_unknown):
-            kw = term
+        if matches(o, kw, exclude):
             hit = found.setdefault(o.key, o)
             if kw not in hit.matched:
                 hit.matched.append(kw)
@@ -181,10 +164,10 @@ def scan(cfg: dict) -> list[Offer]:
                 for i, kw in enumerate(keywords):
                     progress(key, i)
                     try:
-                        for o in src.search(kw[0]):
+                        for o in src.search(kw):
                             add(o, kw)
                     except Exception as e:
-                        print(f"[{key}] zoeken op '{kw[0]}' mislukt: {e}")
+                        print(f"[{key}] zoeken op '{kw}' mislukt: {e}")
                     time.sleep(1)
                 STATE["per_store"][key] = {"ok": True, "offers": None}
         except Exception as e:
@@ -223,7 +206,7 @@ def run_once(notify_enabled: bool = True):
     try:
         cfg = load_config()
         DATA.mkdir(parents=True, exist_ok=True)
-        print("Scan gestart voor: " + ", ".join(t + (f" (min. {m:g}%)" if m else "") for t, m in keyword_list(cfg)))
+        print("Scan gestart voor: " + ", ".join(keyword_list(cfg)))
         offers = scan(cfg)
 
         seen_file = DATA / "seen.json"

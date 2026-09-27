@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.2.0 — 2026-09-28
+
+- Kortingsfilter verwijderd (minimum per product, standaardminimum en filter in de resultaten). Bestaande configs met `monster 30%` of `min_discount` worden automatisch omgezet naar alleen het zoekwoord
+
 ## v1.1.0 — 2026-09-28
 
 - Voortgangsbalk met percentage en huidige winkel tijdens een scan, ook op de scanknop

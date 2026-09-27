@@ -89,21 +89,10 @@ class Handler(BaseHTTPRequestHandler):
             sched = str(body.get("schedule") or "")
             if sched and not croniter.is_valid(sched):
                 return self._send(400, {"error": f"Schema '{sched}' is geen geldige cron-regel"})
-            kws = []
-            for k in body.get("keywords", []):
-                if isinstance(k, dict) and str(k.get("term", "")).strip():
-                    mn = k.get("min_discount")
-                    kws.append({"term": str(k["term"]).strip(),
-                                "min_discount": max(0, min(99, int(mn)))} if mn not in (None, "")
-                               else str(k["term"]).strip())
-                elif isinstance(k, str) and k.strip():
-                    kws.append(k.strip())
-            body["keywords"] = kws
-            try:
-                body["min_discount"] = max(0, min(99, int(body.get("min_discount") or 0)))
-            except (TypeError, ValueError):
-                body["min_discount"] = 0
+            body["keywords"] = main.keyword_list(body)
             body["exclude"] = [str(k).strip() for k in body.get("exclude", []) if str(k).strip()]
+            for old in ("min_discount", "include_unknown_discount"):
+                body.pop(old, None)
             main.save_config(body)
             print("Instellingen opgeslagen via GUI")
             return self._send(200, {"saved": True})
