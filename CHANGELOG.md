@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.2.1 — 2026-09-28
+
+- Fix: vreemde mini-scrollbar rechts naast de tabbladen (vooral zichtbaar in donkere modus op Windows)
+- Scrollbalken en formulierelementen volgen nu het licht/donker-thema
+
 ## v1.2.0 — 2026-09-28
 
 - Kortingsfilter verwijderd (minimum per product, standaardminimum en filter in de resultaten). Bestaande configs met `monster 30%` of `min_discount` worden automatisch omgezet naar alleen het zoekwoord
