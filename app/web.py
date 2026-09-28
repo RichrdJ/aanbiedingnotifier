@@ -62,6 +62,7 @@ class Handler(BaseHTTPRequestHandler):
         if p == "/api/status":
             cfg = main.load_config()
             return self._send(200, {**main.STATE, "schedule": main.get_schedule(cfg),
+                                    "version": os.getenv("APP_VERSION", "dev"),
                                     "stores": main.STORE_NAMES})
         if p == "/api/offers":
             f = main.DATA / "latest.json"

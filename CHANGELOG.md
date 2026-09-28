@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.2.3 — 2026-09-28
+
+- Versienummer subtiel onderaan de GUI, met link naar de release
+- Versie wordt bij het bouwen in de image gezet (`APP_VERSION`)
+
 ## v1.2.2 — 2026-09-28
 
 - Schakelaars in iOS-stijl: groen als ze aan staan, goed zichtbaar in licht én donker thema
