@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.2.2 — 2026-09-28
+
+- Schakelaars in iOS-stijl: groen als ze aan staan, goed zichtbaar in licht én donker thema
+
 ## v1.2.1 — 2026-09-28
 
 - Fix: vreemde mini-scrollbar rechts naast de tabbladen (vooral zichtbaar in donkere modus op Windows)
