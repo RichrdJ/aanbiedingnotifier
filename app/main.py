@@ -229,7 +229,8 @@ def run_once(notify_enabled: bool = True):
         (DATA / "latest.md").write_text(f"# {title}\n\n{body}\n", encoding="utf-8")
         print(f"{title}\n{body}")
         if notify_enabled:
-            notify.send(cfg, title, body)
+            icon = next((o.image for o in to_send if getattr(o, "image", "")), "")
+            notify.send(cfg, title, body, icon=icon)
         STATE.update(last_scan=datetime.now().isoformat(timespec="seconds"), last_count=len(offers))
         return True
     except Exception as e:

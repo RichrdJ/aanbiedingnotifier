@@ -1,15 +1,18 @@
 import requests
 
 
-def send(cfg: dict, title: str, body: str):
+def send(cfg: dict, title: str, body: str, icon: str = ""):
     n = cfg.get("notify", {}) or {}
 
     c = n.get("ntfy") or {}
     if c.get("enabled"):
+        headers = {"Title": title.encode("utf-8"), "Tags": "shopping_cart", "Markdown": "yes"}
+        if icon:
+            headers["Icon"] = icon
         _try("ntfy", lambda: requests.post(
             f"{c.get('server', 'https://ntfy.sh').rstrip('/')}/{c['topic']}",
             data=body.encode("utf-8"),
-            headers={"Title": title.encode("utf-8"), "Tags": "shopping_cart", "Markdown": "yes"},
+            headers=headers,
             timeout=20).raise_for_status())
 
     c = n.get("telegram") or {}

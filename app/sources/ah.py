@@ -10,6 +10,14 @@ HEADERS = {
 }
 
 
+def _pick_image(images) -> str:
+    """Kies een productfoto van ~400px (goede balans voor een melding-icoon)."""
+    urls = [(i.get("width") or 0, i.get("url")) for i in (images or []) if i.get("url")]
+    if not urls:
+        return ""
+    return min(urls, key=lambda t: abs(t[0] - 400))[1]
+
+
 class AlbertHeijn:
     name = "Albert Heijn"
 
@@ -46,5 +54,6 @@ class AlbertHeijn:
                 deal=deal or "Bonus",
                 valid_until=p.get("bonusEndDate", ""),
                 url=f"https://www.ah.nl/producten/product/wi{pid}" if pid else "",
+                image=_pick_image(p.get("images")),
             ))
         return offers
