@@ -14,6 +14,10 @@ sinds de vorige scan. Filter op winkel of zoek erdoorheen.
 
 <img src="docs/images/aanbiedingen-dark.png" alt="Tab Aanbiedingen" width="800">
 
+Start je een scan met **Nu scannen**, dan zie je bovenin live de voortgang per winkel.
+
+<img src="docs/images/scan-dark.png" alt="Scan in uitvoering met voortgangsbalk" width="800">
+
 **Instellingen** — winkels aan/uit met het resultaat van de laatste scan, het scanschema,
 uitsluitwoorden en de meldingskanalen (ntfy, Telegram, Discord, Pushover) met testknop.
 
