@@ -4,6 +4,26 @@ Scant elke week de acties van **Albert Heijn, Jumbo, Lidl, Aldi, Dirk, DekaMarkt
 (inclusief voormalige Coop-winkels) op producten die jij opgeeft, bijv. Monster of Fitmeals,
 en stuurt je een pushmelding.
 
+## Screenshots
+
+De webinterface op poort 4040 heeft drie tabbladen. *(Voorbeelden met fictieve data.)*
+
+**Aanbiedingen** — resultaten gegroepeerd per product dat je volgt, met de prijs, de actie
+(bijv. *2e halve prijs* of *1+1 gratis*), de oude prijs en een **Nieuw**-markering voor acties
+sinds de vorige scan. Filter op winkel of zoek erdoorheen.
+
+<img src="docs/images/aanbiedingen.png" alt="Tab Aanbiedingen" width="800">
+
+**Instellingen** — winkels aan/uit met het resultaat van de laatste scan, het scanschema,
+uitsluitwoorden en de meldingskanalen (ntfy, Telegram, Discord, Pushover) met testknop.
+
+<img src="docs/images/instellingen.png" alt="Tab Instellingen" width="800">
+
+**Logboek** — live meekijken tijdens een scan; per winkel zie je wat er gevonden is en waar
+het misging.
+
+<img src="docs/images/logboek.png" alt="Tab Logboek" width="800">
+
 ## Versies
 
 Elke release krijgt een eigen image-tag, bijv. `ghcr.io/richrdj/aanbiedingnotifier:1.0.0`. `latest` volgt de main-branch.
