@@ -1,5 +1,5 @@
 # Officiële Playwright-image: Chromium + alle systeemlibs zitten er al in
-FROM mcr.microsoft.com/playwright/python:v1.47.0-jammy
+FROM mcr.microsoft.com/playwright/python:v1.64.1-noble
 ENV PYTHONUNBUFFERED=1 TZ=Europe/Amsterdam
 WORKDIR /app
 COPY requirements.txt .

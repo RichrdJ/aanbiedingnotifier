@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.2.4 — 2026-10-26
+
+- Beveiligingsupdate: Playwright 1.47.0 → 1.64.1 met bijbehorende image (Ubuntu 24.04 en een actuele Chromium) en requests 2.32.3 → 2.34.2 (CVE-2024-47081, CVE-2026-25645)
+
 ## v1.2.3 — 2026-09-28
 
 - Versienummer subtiel onderaan de GUI, met link naar de release
